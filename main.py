@@ -4,8 +4,6 @@ from datetime import date, datetime, timedelta
 import requests
 import StringIO
 
-import settings
-
 class ShopifyAKImporter:
 
     def __init__(self, settings):
@@ -39,10 +37,12 @@ class ShopifyAKImporter:
         )
 
 
-    def get_csv(self, url):
+    def get_csv(self, url=None):
         """
         Generate CSV file from a URL
         """
+        if url is None:
+            url = self.get_url()
         # Get orders
         orders = requests.get(url).json().get('orders', [])
         # Filter out refunds
@@ -60,7 +60,7 @@ class ShopifyAKImporter:
         ])
         for order in orders:
             # Prepare data
-            donation_import_id = 'shopify-' + str(order.get('number', ''))
+            donation_import_id = 'shopify-' + str(order.get('order_number', ''))
             email = order.get('email', '')
             donation_date = order.get('created_at', '')
             donation_amount = order.get('total_price', '')
@@ -107,6 +107,8 @@ class ShopifyAKImporter:
         )
 
 if __name__ == '__main__':
+
+    import settings
 
     parser = argparse.ArgumentParser(description='Import shopify orders into ActionKit.')
     parser.add_argument('--date', dest='min_date', help='date of orders to import')
