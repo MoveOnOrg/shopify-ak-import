@@ -106,7 +106,7 @@ class ShopifyAKImporter:
             auth=(self.settings.AK_USER, self.settings.AK_PASSWORD)
         )
 
-if __name__ == '__main__':
+def main():
 
     import settings
 
@@ -134,3 +134,9 @@ if __name__ == '__main__':
             # Send to ActionKit
             importer.import_to_ak(csv_file)
         csv_file.close()
+
+def aws_lambda(event, context):
+    main()
+
+if __name__ == '__main__':
+    main()
