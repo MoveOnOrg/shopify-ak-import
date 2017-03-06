@@ -101,8 +101,8 @@ class ShopifyAKImporter:
         """
         url  = self.settings.AK_API_BASE_URL + 'upload/'
         requests.post(url,
-            files={'upload': csv_file},
-            data={'page': self.settings.AK_IMPORT_PAGE, 'autocreate_user_fields': 'false'},
+            files={'upload': StringIO.StringIO(csv_file.getvalue())},
+            data={'page': self.settings.AK_IMPORT_PAGE, 'autocreate_user_fields': 0},
             auth=(self.settings.AK_USER, self.settings.AK_PASSWORD)
         )
 
@@ -130,7 +130,7 @@ if __name__ == '__main__':
             # Output CSV
             contents = csv_file.getvalue()
             print(contents)
-        # else:
-        #     # Send to ActionKit
-        #     importer.import_to_ak(csv_file)
+        else:
+            # Send to ActionKit
+            importer.import_to_ak(csv_file)
         csv_file.close()
