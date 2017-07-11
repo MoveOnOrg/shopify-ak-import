@@ -9,11 +9,39 @@ class ShopifyAKImporter:
     def __init__(self, settings):
         self.settings = settings
 
-    def get_url(self, min_date=None, since_id=None):
+    def get_count(self, min_date=None, since_id=None):
+
+        query = 'status=any'
+
+        if min_date:
+            # Specific date if provided
+            min_date = datetime.strptime(min_date, "%Y-%m-%d")
+            max_date = min_date + timedelta(days=1)
+            query += '&created_at_min=%sT00:00:00-05:00&created_at_max=%sT00:00:00-05:00' % (datetime.strftime(min_date, "%Y-%m-%d"), datetime.strftime(max_date, "%Y-%m-%d"))
+        elif since_id:
+            # Since ID if provided
+            query += '&since_id=%s' % since_id
+        else:
+            # Default to yesterday
+            max_date = date.today()
+            min_date = max_date + timedelta(days=-1)
+            query += '&created_at_min=%sT00:00:00-05:00&created_at_max=%sT00:00:00-05:00' % (datetime.strftime(min_date, "%Y-%m-%d"), datetime.strftime(max_date, "%Y-%m-%d"))
+
+        url = 'https://%s:%s@%s.myshopify.com/admin/orders/count.json?%s' % (
+            self.settings.SHOPIFY_API_KEY,
+            self.settings.SHOPIFY_PASSWORD,
+            self.settings.SHOPIFY_SUBDOMAIN,
+            query
+        )
+
+        return requests.get(url).json().get('count', 0)
+
+
+    def get_url(self, min_date=None, since_id=None, page=1):
         """
         Generate a Shopify order request URL from given filters
         """
-        query = 'limit=250&status=any'
+        query = 'page=%s&limit=250&status=any' % page
 
         if min_date:
             # Specific date if provided
@@ -115,25 +143,43 @@ def main():
     parser.add_argument('--since', dest='since_id', help='ID after which to import')
     parser.add_argument('--url', dest='url_only', help='only output URL', action='store_const', const=True, default=False)
     parser.add_argument('--csv', dest='csv_only', help='only output CSV', action='store_const', const=True, default=False)
+    parser.add_argument('--count', dest='count_only', help='only output count', action='store_const', const=True, default=False)
+
 
     args = parser.parse_args()
 
     importer = ShopifyAKImporter(settings)
-    url = importer.get_url(args.min_date, args.since_id)
 
-    if args.url_only:
-        # Output URL without doing anything (for checking data in browser)
-        print(url)
+    count = importer.get_count(args.min_date, args.since_id)
+
+    if args.count_only:
+        print(count)
     else:
-        csv_file = importer.get_csv(url)
-        if args.csv_only:
-            # Output CSV
-            contents = csv_file.getvalue()
-            print(contents)
-        else:
-            # Send to ActionKit
-            importer.import_to_ak(csv_file)
-        csv_file.close()
+
+        imported = 0
+        page = 1
+
+        while imported <= count:
+
+            url = importer.get_url(args.min_date, args.since_id, page)
+
+            if args.url_only:
+                # Output URL without doing anything (for checking data in browser)
+                print(url)
+            else:
+                csv_file = importer.get_csv(url)
+                if args.csv_only:
+                    # Output CSV
+                    contents = csv_file.getvalue()
+                    print(contents)
+                else:
+                    # Send to ActionKit
+                    importer.import_to_ak(csv_file)
+                csv_file.close()
+
+            imported += 250
+            page += 1
+
 
 def aws_lambda(event, context):
     main()
