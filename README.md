@@ -1,6 +1,6 @@
 # Shopify ActionKit Import
 
-This Python 2.7 script imports Shopify orders into ActionKit.
+This Python 3.6 script imports Shopify orders into ActionKit.
 
 ## Install
 

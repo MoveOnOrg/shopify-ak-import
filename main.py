@@ -1,8 +1,9 @@
 import argparse
 import csv
 from datetime import date, datetime, timedelta
+from io import StringIO
+
 import requests
-import StringIO
 
 class ShopifyAKImporter:
 
@@ -76,7 +77,7 @@ class ShopifyAKImporter:
         # Filter out refunds
         orders = [order for order in orders if order.get('financial_status', '') != 'refunded']
         # Write orders to CSV
-        output_file = StringIO.StringIO()
+        output_file = StringIO()
         csv_writer = csv.writer(output_file)
         csv_writer.writerow([
             'donation_import_id', 'email', 'donation_date',
@@ -131,7 +132,7 @@ class ShopifyAKImporter:
         """
         url  = self.settings.AK_API_BASE_URL + 'upload/'
         result = requests.post(url,
-            files={'upload': StringIO.StringIO(csv_file.getvalue())},
+            files={'upload': StringIO(csv_file.getvalue())},
             data={'page': self.settings.AK_IMPORT_PAGE, 'autocreate_user_fields': 0},
             auth=(self.settings.AK_USER, self.settings.AK_PASSWORD)
         )
