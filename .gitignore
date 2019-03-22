@@ -1,3 +1,5 @@
 venv
 *.pyc
 settings.py
+zappa_settings.json
+secrets.tar

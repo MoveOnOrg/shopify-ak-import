@@ -1,8 +1,9 @@
 import argparse
 import csv
 from datetime import date, datetime, timedelta
+from io import StringIO
+
 import requests
-import StringIO
 
 class ShopifyAKImporter:
 
@@ -76,7 +77,7 @@ class ShopifyAKImporter:
         # Filter out refunds
         orders = [order for order in orders if order.get('financial_status', '') != 'refunded']
         # Write orders to CSV
-        output_file = StringIO.StringIO()
+        output_file = StringIO()
         csv_writer = csv.writer(output_file)
         csv_writer.writerow([
             'donation_import_id', 'email', 'donation_date',
@@ -84,7 +85,8 @@ class ShopifyAKImporter:
             'address1', 'address2', 'city',
             'postal', 'state', 'country',
             'phone', 'user_occupation', 'user_employer',
-            'source', 'donation_payment_account'
+            'source', 'donation_payment_account',
+            'action_occupation', 'action_employer'
         ])
         for order in orders:
             # Prepare data
@@ -118,7 +120,8 @@ class ShopifyAKImporter:
                 address1.encode('utf-8'), address2, city.encode('utf-8'),
                 postal, state, country,
                 phone, user_occupation.encode('utf-8'), user_employer.encode('utf-8'),
-                self.settings.AK_SOURCE, self.settings.AK_PAYMENT_ACCOUNT
+                self.settings.AK_SOURCE, self.settings.AK_PAYMENT_ACCOUNT,
+                user_occupation.encode('utf-8'), user_employer.encode('utf-8')
             ])
 
         return output_file
@@ -128,11 +131,12 @@ class ShopifyAKImporter:
         Import given CSV file into ActionKit
         """
         url  = self.settings.AK_API_BASE_URL + 'upload/'
-        requests.post(url,
-            files={'upload': StringIO.StringIO(csv_file.getvalue())},
+        result = requests.post(url,
+            files={'upload': StringIO(csv_file.getvalue())},
             data={'page': self.settings.AK_IMPORT_PAGE, 'autocreate_user_fields': 0},
             auth=(self.settings.AK_USER, self.settings.AK_PASSWORD)
         )
+        return result
 
 def main():
 
@@ -174,7 +178,7 @@ def main():
                     print(contents)
                 else:
                     # Send to ActionKit
-                    importer.import_to_ak(csv_file)
+                    result = importer.import_to_ak(csv_file)
                 csv_file.close()
 
             imported += 250

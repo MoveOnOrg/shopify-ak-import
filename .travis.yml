@@ -1,0 +1,17 @@
+language: python
+python:
+- '3.6'
+before_install:
+- openssl aes-256-cbc -K $encrypted_ef209b36ec3d_key -iv $encrypted_ef209b36ec3d_iv
+  -in secrets.tar.enc -out secrets.tar -d
+- tar xvf secrets.tar
+install:
+- pip install -r requirements.txt
+script:
+- pytest
+after_success:
+- test $TRAVIS_BRANCH = "main" && zappa update
+env:
+  global:
+  - secure: Tw/fjRVcZgxjculBFL5D0JEHEmnW7MtbpoZPBI1O7CEcmzpeUPE+cI7HPmdTFtxGmJD7JGcZJzzVohBF+c+8T+4I8Gfrq+D61PqGGRPgUnL97Fa7uER/CLt5rkSBiIMPvS2migH2bXy1ykYqyOM/2GA4VZZfeEvZvn1ArRjdgdhJmdN4i4x50xIEE4XfJLthBiyB9nCv5O1vulSShGgotTNvHxHVXG7qQl61c+Ik2d7N755EmzOyBStckAZTVjSGcH++KwmEi3eq31w9gyV1aSZAVcxWs+csxZDkbFJd7cm1j+sD0htYiXZnWWBZ52HrtXFez8xHYAD1GryaWep4eTyUHDAtfrdHtnObwTvt2QxyCQ65F/4UY8+QzhPHnh3RwB4VFs8Xpj69j6vUlbcbwU8MApaweGKKcunj1w958AXITVLdvJm4roMd/X/Fx0v83cjLhetQYrTcU3ms4XkGieqi/4gafDzbFYEIQ+jl7Sw3dpqNDw4LGd7b4DWOTwZloIdtoUgEWCbxQ4WBWjMO0NHvRVBiiVNSubv9RBaYyvExJmh3sQMZ/P+3LQCSRCFgx7H/t+eVyZG0Tljzb9/a0BQAPEev3ZDI159y028uXeJWQIoAswr0YwqURqbVsSFjS7P8brGsmiIvp35S0cX66fJZp8XCIQWlzkMqvijZnVs=
+  - secure: xpj6+xGBtfYdAaenwANGsfVWGYmB0fY5pvjcvINY4YJYLKZONiN4a2eUUxOcEYCzNHJa7Y5cix3oCs0Sih++solJ2dSkm+6tz6esRh6ITKbRWJhje1uVVW7V8Zjy9FB4Th7l3ctzfycgyE0yWfnEQJZqalw+z+ReSZsxknTtGp+fu97jnhAhlRjq/KG/mY+ohf5tJed17vIxbwD3ZifQWmoeiXMt80lkjxUMj7goJTTWiHsJGV9rBbX9t5SHWIhaJTswrQ+xjRImjXP51Rhj8qtemJVKn/3ExkcCygbd/X1LBuc7lsCpJ0KR09gOQY+q4Uc/a5ixoysjQSgEr7C6yerxOeEuWeoEvpKnx7c5qKG0iF1ulmOm6sgjpC0Z78xRhuNzDRvWAsnFBS6xL7hqz/zuSovf5eXJStMxYGTmRnYfWPqBQwu/sRNtOWrTBowctmKhEG9S07CYoiuxwGKTKr3OxQ+JlcRsIiZjecX0UzP2kmZ3b3OBDy/n3YoNLp6BYf8mvxnCvWjE28f7jNEYhamnzjPsqJgNUJZ43E0HH73n/klAGZI4Ni2PbK6iWkqmQNSD171/pyl2YdwDS0Q0T8vY9hAUXfTvpbkh9P3ywM9JRR3UMgP2oc+tUolWAr939F6Dn576FJ9nXgcgQ+QJybmKiMcOw8uKj/kLCeYZ4fY=
