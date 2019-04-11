@@ -116,12 +116,19 @@ class ShopifyAKImporter:
             # Write CSV row
             csv_writer.writerow([
                 donation_import_id, email, donation_date,
-                donation_amount, first_name.encode('utf-8'), last_name.encode('utf-8'),
-                address1.encode('utf-8'), address2, city.encode('utf-8'),
+                donation_amount,
+                first_name.encode('utf-8').decode('utf-8', 'ignore'),
+                last_name.encode('utf-8').decode('utf-8', 'ignore'),
+                address1.encode('utf-8').decode('utf-8', 'ignore'),
+                address2,
+                city.encode('utf-8').decode('utf-8', 'ignore'),
                 postal, state, country,
-                phone, user_occupation.encode('utf-8'), user_employer.encode('utf-8'),
+                phone,
+                user_occupation.encode('utf-8').decode('utf-8', 'ignore'),
+                user_employer.encode('utf-8').decode('utf-8', 'ignore'),
                 self.settings.AK_SOURCE, self.settings.AK_PAYMENT_ACCOUNT,
-                user_occupation.encode('utf-8'), user_employer.encode('utf-8')
+                user_occupation.encode('utf-8').decode('utf-8', 'ignore'),
+                user_employer.encode('utf-8').decode('utf-8', 'ignore')
             ])
 
         return output_file
